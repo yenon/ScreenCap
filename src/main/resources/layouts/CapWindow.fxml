@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.effect.ColorAdjust?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Pane?>
+<?import yenon.screencap.ui.SelectingTilePane?>
+
+<AnchorPane fx:id="mainPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" pickOnBounds="false" xmlns="http://javafx.com/javafx/8.0.76-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="yenon.screencap.ui.CapWindowController">
+    <Pane fx:id="canvasPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <Canvas fx:id="canvasPreview">
+         <effect>
+            <ColorAdjust brightness="-0.5" />
+         </effect></Canvas>
+    </Pane>
+    <Canvas fx:id="canvasSelection" height="200.0" pickOnBounds="true" width="200.0" />
+    <SelectingTilePane fx:id="flowPaneTools" hgap="4.0" prefHeight="0.0" prefWidth="40.0" style="-fx-background-color: darkGray;" vgap="4.0" visible="false">
+        <padding>
+            <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+        </padding>
+    </SelectingTilePane>
+</AnchorPane>
