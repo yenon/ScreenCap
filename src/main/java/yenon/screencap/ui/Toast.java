@@ -1,8 +1,5 @@
 package yenon.screencap.ui;
 
-/**
- * Created by yenon on 11/20/16.
- */
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
@@ -19,6 +16,9 @@ import javafx.util.Duration;
 
 import java.awt.*;
 
+/**
+ * Created by yenon on 11/20/16.
+ */
 public final class Toast
 {
 

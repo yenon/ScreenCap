@@ -2,9 +2,7 @@ package yenon.screencap.ui;
 
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.ObservableList;
-import javafx.event.EventHandler;
 import javafx.scene.Node;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.TilePane;
 
 /**
@@ -16,14 +14,12 @@ public class SelectingTilePane extends TilePane {
 
     public void addMonitoredNode(Node monitoredNode, Runnable onClick) {
         final int pos = super.getChildren().size();
-        monitoredNode.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent mouseEvent) {
-                Node node = SelectingTilePane.super.getChildren().get(selectedNode.get());
-                node.setStyle("");
-                selectedNode.setValue(pos);
-                monitoredNode.setStyle("-fx-background-color #0000FF77; -fx-background-radius: 4;");
-            }
+        monitoredNode.setOnMouseClicked(mouseEvent -> {
+            Node node = SelectingTilePane.super.getChildren().get(selectedNode.get());
+            node.setStyle("");
+            selectedNode.setValue(pos);
+            monitoredNode.setStyle("-fx-background-color: #0000FF77; -fx-background-radius: 4;");
+            onClick.run();
         });
         super.getChildren().add(monitoredNode);
     }

@@ -1,50 +1,69 @@
 package yenon.screencap.draw;
 
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.event.EventHandler;
-import javafx.geometry.Rectangle2D;
-import javafx.scene.*;
 import javafx.scene.Cursor;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.*;
-import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import yenon.screencap.drag.DragHandler;
 import yenon.screencap.drag.DragListener;
-import yenon.screencap.tools.PaintTool;
 import yenon.screencap.tools.ToolView;
+import yenon.screencap.ui.BackgroundImageView;
+import yenon.screencap.ui.ColorPane;
 import yenon.screencap.ui.SelectingTilePane;
 
-import java.awt.*;
+import java.awt.Point;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
-import java.util.function.Predicate;
+import java.util.EnumSet;
 
 /**
  * Created by yenon on 11/19/16.
  */
-public class DrawHandler implements DragListener {
-    private final ToolView[] tools = new ToolView[]{new PaintTool()};
+public class DrawHandler {
+
+    private enum DragPos{TOP,BOTTOM,LEFT,RIGHT}
+
     private ToolView currentTool,moveTool;
 
     private WritableImage screenshotImage;
     private Canvas fullCanvas,managedCanvas;
     private SelectingTilePane flowPaneTools;
     private ArrayList<DrawAction> drawActions = new ArrayList<>();
-    private SimpleIntegerProperty drawActionDepth = new SimpleIntegerProperty();
+    private SimpleIntegerProperty drawActionDepth = new SimpleIntegerProperty(0);
+    private ColorPane colorPane = new ColorPane();
+
+    private EnumSet<DragPos> getDragPos(double x,double y){
+        //x=x-managedCanvas.getLayoutX();
+        //y=y-managedCanvas.getLayoutY();
+        EnumSet<DragPos> dragPos = EnumSet.noneOf(DragPos.class);
+
+        int DRAG_MARGIN = 8;
+        if(y>managedCanvas.getHeight()- DRAG_MARGIN) {
+            dragPos.add(DragPos.BOTTOM);
+        }
+        if(y< DRAG_MARGIN){
+            dragPos.add(DragPos.TOP);
+        }
+        if(x>managedCanvas.getWidth()- DRAG_MARGIN){
+            dragPos.add(DragPos.RIGHT);
+        }
+        if(x< DRAG_MARGIN){
+            dragPos.add(DragPos.LEFT);
+        }
+        return dragPos;
+    }
 
     public DrawHandler(Canvas fullCanvas,Canvas managedCanvas,WritableImage screenshotImage, SelectingTilePane flowPaneTools){
         this.fullCanvas = fullCanvas;
         this.managedCanvas = managedCanvas;
         this.screenshotImage=screenshotImage;
         this.flowPaneTools = flowPaneTools;
-
+        //region Background dragging
         DragHandler fullDragHandler = new DragHandler();
         fullDragHandler.attachTo(fullCanvas);
         fullDragHandler.addDragListener(new DragListener() {
@@ -60,101 +79,180 @@ public class DrawHandler implements DragListener {
                 redrawCanvas();
             }
         });
+        //endregion
+        //region Foreground dragging
+        DragHandler dragHandler = new DragHandler();
+        dragHandler.attachTo(managedCanvas);
+        dragHandler.addDragListener(new DragListener() {
 
-        managedCanvas.setCursor(Cursor.MOVE);
-        //DragHandler dragHandler = new DragHandler();
-        //dragHandler.attachTo(managedCanvas);
-        //dragHandler.addDragListener(this);
-        managedCanvas.setOnMouseMoved(new EventHandler<MouseEvent>() {
+            EnumSet<DragPos> dragPos = null;
+            Point2D.Double lastPos;
+
+            private void updateArea(double x,double y){
+                if(dragPos.isEmpty()){
+                    managedCanvas.setLayoutX(managedCanvas.getLayoutX()+x);
+                    managedCanvas.setLayoutY(managedCanvas.getLayoutY()+y);
+                }else {
+                    if (dragPos.contains(DragPos.TOP)) {
+                        managedCanvas.setLayoutY(managedCanvas.getLayoutY() + y);
+                        managedCanvas.setHeight(managedCanvas.getHeight() - y);
+                    }
+                    if (dragPos.contains(DragPos.BOTTOM)) {
+                        managedCanvas.setHeight(managedCanvas.getHeight() + y);
+                    }
+                    if (dragPos.contains(DragPos.LEFT)) {
+                        managedCanvas.setLayoutX(managedCanvas.getLayoutX() + x);
+                        managedCanvas.setWidth(managedCanvas.getWidth() - x);
+                    }
+                    if (dragPos.contains(DragPos.RIGHT)) {
+                        managedCanvas.setWidth(managedCanvas.getWidth() + x);
+                    }
+                }
+                if (managedCanvas.getLayoutX() < 0) {
+                    managedCanvas.setLayoutX(0);
+                }
+                if (managedCanvas.getLayoutY() < 0) {
+                    managedCanvas.setLayoutY(0);
+                }
+                if(managedCanvas.getWidth()>fullCanvas.getWidth()){
+                    managedCanvas.setWidth(fullCanvas.getWidth());
+                }
+                if(managedCanvas.getHeight()>fullCanvas.getHeight()){
+                    managedCanvas.setHeight(fullCanvas.getHeight());
+                }
+                if (managedCanvas.getLayoutX()+managedCanvas.getWidth()>fullCanvas.getWidth()){
+                    managedCanvas.setLayoutX(fullCanvas.getWidth()-managedCanvas.getWidth());
+                }
+                if (managedCanvas.getLayoutY()+managedCanvas.getHeight()>fullCanvas.getHeight()){
+                    managedCanvas.setLayoutY(fullCanvas.getHeight()-managedCanvas.getHeight());
+                }
+
+                redrawCanvas();
+            }
+
             @Override
-            public void handle(MouseEvent mouseEvent) {
+            public void onDragUpdate(MouseEvent start, MouseEvent current) {
+                if(currentTool==moveTool) {
+                    if (dragPos == null) {
+                        dragPos = getDragPos(start.getSceneX() - managedCanvas.getLayoutX(), start.getSceneY() - managedCanvas.getLayoutY());
+                        lastPos = new Point.Double(start.getSceneX(), start.getSceneY());
+                    }
+                    updateArea(current.getSceneX() - lastPos.getX(), current.getSceneY() - lastPos.getY());
+                    lastPos.setLocation(current.getSceneX(), current.getSceneY());
+                }else{
+                    redrawCanvas();
+                    currentTool.getDrawAction(start, current,colorPane.getColor(),colorPane.getRadius()).draw(managedCanvas.getGraphicsContext2D());
+                }
+            }
 
-                managedCanvas.setCursor(Cursor.CROSSHAIR);
+            @Override
+            public void onDragFinished(MouseEvent start, MouseEvent end) {
+                if(currentTool==moveTool) {
+                    updateArea(end.getSceneX() - lastPos.getX(), end.getSceneY() - lastPos.getY());
+                    dragPos = null;
+                }else {
+                    while (drawActions.size()>drawActionDepth.get()){
+                        drawActions.remove(drawActions.size()-1);
+                    }
+                    DrawAction action = currentTool.getDrawAction(start, end,colorPane.getColor(),colorPane.getRadius());
+                    drawActions.add(action);
+                    drawActionDepth.set(drawActions.size());
+                    redrawCanvas();
+                }
             }
         });
-
-
+        //endregion
+        //region Color Picker
+        flowPaneTools.addNode(colorPane);
+        //endregion
+        //region Move Tool
         moveTool = new ToolView("Move the selection","/images/move.png") {
             @Override
-            public DrawAction getDrawAction(MouseEvent start, MouseEvent end) {
-                return new DrawAction(new DrawAction.DrawRunnable() {
-                    @Override
-                    public void draw(GraphicsContext canvas, Rectangle selection) {
-
-                    }
-                });
+            public DrawAction getDrawAction(MouseEvent start, MouseEvent end,Color color,double radius) {
+                return new DrawAction(color,radius,(canvas) -> {});
             }
         };
-        flowPaneTools.addMonitoredNode(moveTool, new Runnable() {
-            @Override
-            public void run() {
-                currentTool=moveTool;
+        moveTool.setPickOnBounds(true);
+        flowPaneTools.addMonitoredNode(moveTool, () -> currentTool=moveTool);
+        currentTool=moveTool;
+        //endregion
+        //region MouseAnimation
+        managedCanvas.setOnMouseMoved(mouseEvent -> {
+            if(currentTool!=moveTool) {
+                managedCanvas.setCursor(Cursor.CROSSHAIR);
+                return;
+            }
+            EnumSet<DragPos> dragPos = getDragPos(mouseEvent.getX(),mouseEvent.getY());
+            if(dragPos.isEmpty()){
+                managedCanvas.setCursor(Cursor.MOVE);
+                return;
+            }
+            if(dragPos.contains(DragPos.TOP)){
+                if(dragPos.contains(DragPos.LEFT)){
+                    managedCanvas.setCursor(Cursor.NW_RESIZE);
+                    return;
+                }
+                if(dragPos.contains(DragPos.RIGHT)){
+                    managedCanvas.setCursor(Cursor.NE_RESIZE);
+                    return;
+                }
+                managedCanvas.setCursor(Cursor.N_RESIZE);
+                return;
+            }
+            if(dragPos.contains(DragPos.BOTTOM)){
+                if(dragPos.contains(DragPos.LEFT)){
+                    managedCanvas.setCursor(Cursor.SW_RESIZE);
+                    return;
+                }
+                if(dragPos.contains(DragPos.RIGHT)){
+                    managedCanvas.setCursor(Cursor.SE_RESIZE);
+                    return;
+                }
+                managedCanvas.setCursor(Cursor.S_RESIZE);
+                return;
+            }
+            if(dragPos.contains(DragPos.LEFT)){
+                managedCanvas.setCursor(Cursor.W_RESIZE);
+            }else {
+                managedCanvas.setCursor(Cursor.E_RESIZE);
             }
         });
-        currentTool=moveTool;
-        for(ToolView view:tools){
-            flowPaneTools.addMonitoredNode(view, new Runnable() {
-                @Override
-                public void run() {
-                    managedCanvas.setCursor(Cursor.DEFAULT);
-                    currentTool = view;
-                }
+        //endregion
+        //region Tool setup
+        for(ToolView view: ToolView.ALL_VIEWS){
+            flowPaneTools.addMonitoredNode(view, () -> {
+                managedCanvas.setCursor(Cursor.DEFAULT);
+                currentTool = view;
             });
         }
 
         if(flowPaneTools.getChildren().size()%2==1){
             flowPaneTools.addNode(new Pane());
         }
-
+        //endregion
         //region Undo
-        ImageView undoImageView = new ImageView(new javafx.scene.image.Image(getClass().getResourceAsStream("/images/undo.png")));
-        undoImageView.setPickOnBounds(true);
-        undoImageView.setFitWidth(16);
-        undoImageView.setFitHeight(16);
+        BackgroundImageView undoImageView = new BackgroundImageView(new javafx.scene.image.Image(getClass().getResourceAsStream("/images/undo.png")));
+        undoImageView.disableProperty().setValue(true);
         undoImageView.setOnMouseClicked(event -> {
-            if(drawActionDepth.get()!=-1){
-                drawActionDepth.subtract(1);
-                redrawCanvas();
-            }
+            drawActionDepth.set(drawActionDepth.getValue()-1);
+            redrawCanvas();
         });
-        drawActionDepth.addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                undoImageView.disableProperty().setValue(newValue.intValue()==0);
-            }
-        });
+        drawActionDepth.addListener((observable, oldValue, newValue) -> undoImageView.setDisable(newValue.intValue() <= 0)
+        );
         Tooltip.install(undoImageView,new Tooltip("Undo last change"));
         flowPaneTools.addNode(undoImageView);
         //endregion
         //region Redo
-        ImageView redoImageView = new ImageView(new javafx.scene.image.Image(getClass().getResourceAsStream("/images/redo.png")));
-        redoImageView.setPickOnBounds(true);
-        redoImageView.setFitWidth(16);
-        redoImageView.setFitHeight(16);
+        BackgroundImageView redoImageView = new BackgroundImageView(new javafx.scene.image.Image(getClass().getResourceAsStream("/images/redo.png")));
         redoImageView.setOnMouseClicked(event -> {
-            if(drawActionDepth.get()<drawActions.size()){
-                drawActionDepth.add(1);
-                redrawCanvas();
-            }
+            drawActionDepth.set(drawActionDepth.getValue()+1);
+            redrawCanvas();
         });
-        drawActionDepth.addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                redoImageView.disableProperty().setValue(newValue.intValue()<drawActions.size());
-            }
-        });
+        drawActionDepth.addListener((observable, oldValue, newValue) -> redoImageView.setDisable(newValue.intValue()>=drawActions.size()));
         Tooltip.install(redoImageView,new Tooltip("Redo last change"));
         flowPaneTools.addNode(redoImageView);
-        drawActionDepth.setValue(0);
+        drawActionDepth.set(0);
         //endregion
-    }
-
-    public void setScreenshotImage(WritableImage screenshotImage){
-        this.screenshotImage=screenshotImage;
-    }
-
-    public WritableImage getScreenshotImage() {
-        return screenshotImage;
     }
 
     public Image getCurrentImage(){
@@ -166,24 +264,26 @@ public class DrawHandler implements DragListener {
         if(screenshotImage==null){
             return;
         }
-        if(managedCanvas.getLayoutX() + managedCanvas.getWidth() + 2 + flowPaneTools.getWidth() < fullCanvas.getWidth()){
-            flowPaneTools.setLayoutX(managedCanvas.getLayoutX() + managedCanvas.getWidth() + 2);
+        if(managedCanvas.getLayoutX() + managedCanvas.getWidth() + 10 + flowPaneTools.getWidth() < fullCanvas.getWidth()){
+            flowPaneTools.setLayoutX(managedCanvas.getLayoutX() + managedCanvas.getWidth() + 10);
         }else {
-            flowPaneTools.setLayoutX(managedCanvas.getLayoutX() + managedCanvas.getWidth() - flowPaneTools.getWidth() - 2);
+            flowPaneTools.setLayoutX(managedCanvas.getLayoutX() + managedCanvas.getWidth() - flowPaneTools.getWidth() - 10);
         }
-        if(managedCanvas.getLayoutY() + flowPaneTools.getHeight() < fullCanvas.getHeight()){
-            flowPaneTools.setLayoutY(managedCanvas.getLayoutY());
+        if(managedCanvas.getLayoutY() + flowPaneTools.getHeight() + 10 < fullCanvas.getHeight()){
+            flowPaneTools.setLayoutY(managedCanvas.getLayoutY() + 10);
         }else {
-            flowPaneTools.setLayoutY(managedCanvas.getLayoutY() - flowPaneTools.getHeight());
+            flowPaneTools.setLayoutY(managedCanvas.getLayoutY() + 10 - flowPaneTools.getHeight());
         }
         GraphicsContext context = managedCanvas.getGraphicsContext2D();
         context.drawImage(screenshotImage,
-                managedCanvas.getLayoutX(),managedCanvas.getLayoutY(),managedCanvas.getWidth(),managedCanvas.getHeight(),
+                managedCanvas.getLayoutX(),managedCanvas.getLayoutY(),
+                managedCanvas.getWidth(),managedCanvas.getHeight(),
                 0,0,managedCanvas.getWidth(),managedCanvas.getHeight());
 
-
-        for (DrawAction action:drawActions){
-            //action.draw(context,selection);
+        int i=0;
+        while (i<drawActionDepth.get()&&i<drawActions.size()){
+            drawActions.get(i).draw(context);
+            i++;
         }
     }
 
@@ -205,33 +305,5 @@ public class DrawHandler implements DragListener {
             managedCanvas.setLayoutY(p2.getY());
             managedCanvas.setHeight(p1.getY()-p2.getY()+1);
         }
-    }
-
-    @Override
-    public void onDragUpdate(MouseEvent start, MouseEvent current) {
-        if(currentTool==moveTool) {
-            makeSelection(start, current);
-        }else {
-            DrawAction action = currentTool.getDrawAction(start, current);
-            //action.draw(managedCanvas.getGraphicsContext2D(), selection);
-        }
-
-        redrawCanvas();
-    }
-
-    @Override
-    public void onDragFinished(MouseEvent start, MouseEvent end) {
-        if(currentTool==moveTool){
-            makeSelection(start, end);
-        }else {
-            DrawAction action = currentTool.getDrawAction(start, end);
-            int i = drawActions.size() - 1;
-            while (i > drawActionDepth.get()) {
-                drawActions.remove(i);
-            }
-            drawActions.add(action);
-            drawActionDepth.set(drawActions.size() - 1);
-        }
-        redrawCanvas();
     }
 }

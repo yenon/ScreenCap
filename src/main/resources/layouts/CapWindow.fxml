@@ -14,7 +14,7 @@
             <ColorAdjust brightness="-0.5" />
          </effect></Canvas>
     </Pane>
-    <Canvas fx:id="canvasSelection" height="200.0" pickOnBounds="true" width="200.0" />
+    <Canvas fx:id="canvasSelection" pickOnBounds="true" />
     <SelectingTilePane fx:id="flowPaneTools" hgap="4.0" prefHeight="0.0" prefWidth="40.0" style="-fx-background-color: darkGray;" vgap="4.0" visible="false">
         <padding>
             <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
