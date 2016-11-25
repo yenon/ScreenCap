@@ -19,17 +19,16 @@ import java.awt.*;
 /**
  * Created by yenon on 11/20/16.
  */
-public final class Toast
-{
+public final class Toast {
 
-    private Stage toastStage;
-    private StackPane root;
-    private long toastDelay;
+    private final Stage toastStage;
+    private final StackPane root;
+    private final long toastDelay;
     private Runnable onFinish;
 
-    public Toast(String toastMsg, int toastDelay){
-        this.toastDelay=toastDelay;
-        toastStage=new Stage();
+    public Toast(String toastMsg, @SuppressWarnings("SameParameterValue") int toastDelay) {
+        this.toastDelay = toastDelay;
+        toastStage = new Stage();
         toastStage.setResizable(false);
         toastStage.initStyle(StageStyle.TRANSPARENT);
 
@@ -47,30 +46,30 @@ public final class Toast
         toastStage.setScene(scene);
     }
 
-    public void show(){
+    public void show() {
         toastStage.show();
         Rectangle bounds = MouseInfo.getPointerInfo().getDevice().getDefaultConfiguration().getBounds();
-        toastStage.setX(bounds.x+bounds.width-10-toastStage.getWidth());
-        toastStage.setY(bounds.y+bounds.height-10-toastStage.getHeight());
+        toastStage.setX(bounds.x + bounds.width - 10 - toastStage.getWidth());
+        toastStage.setY(bounds.y + bounds.height - 10 - toastStage.getHeight());
 
         Timeline fadeInTimeline = new Timeline();
-        KeyFrame fadeInKey1 = new KeyFrame(Duration.millis(500), new KeyValue (toastStage.getScene().getRoot().opacityProperty(), 1));
+        KeyFrame fadeInKey1 = new KeyFrame(Duration.millis(500), new KeyValue(toastStage.getScene().getRoot().opacityProperty(), 1));
         fadeInTimeline.getKeyFrames().add(fadeInKey1);
         fadeInTimeline.setOnFinished((ae) ->
                 new Thread(() -> {
                     try {
                         Thread.sleep(toastDelay);
-                    }catch (InterruptedException e) {
+                    } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                     Timeline fadeOutTimeline = new Timeline();
-                    KeyFrame fadeOutKey1 = new KeyFrame(Duration.millis(2000), new KeyValue (toastStage.getScene().getRoot().opacityProperty(), 0));
+                    KeyFrame fadeOutKey1 = new KeyFrame(Duration.millis(2000), new KeyValue(toastStage.getScene().getRoot().opacityProperty(), 0));
                     fadeOutTimeline.getKeyFrames().add(fadeOutKey1);
                     fadeOutTimeline.setOnFinished((aeb) -> {
-                        if(onFinish!=null){
+                        if (onFinish != null) {
                             try {
                                 onFinish.run();
-                            }catch (Exception ex){
+                            } catch (Exception ex) {
                                 ex.printStackTrace();
                             }
                         }
@@ -81,15 +80,15 @@ public final class Toast
         fadeInTimeline.play();
     }
 
-    public void setOnClickListener(EventHandler<MouseEvent> eventEventHandler){
+    public void setOnClickListener(EventHandler<MouseEvent> eventEventHandler) {
         root.setOnMouseClicked(eventEventHandler);
     }
 
-    public void setOnFinish(Runnable onFinish){
-        this.onFinish=onFinish;
+    public void setOnFinish(Runnable onFinish) {
+        this.onFinish = onFinish;
     }
 
-    public void close(){
+    public void close() {
         toastStage.close();
     }
 }

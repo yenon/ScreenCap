@@ -1,20 +1,20 @@
 package yenon.screencap.ui;
 
 import javafx.application.HostServices;
-import javafx.scene.control.Tooltip;
-import javafx.scene.image.*;
-import javafx.scene.image.Image;
-import javafx.scene.input.Clipboard;
-import javafx.scene.input.ClipboardContent;
-import javafx.scene.layout.AnchorPane;
-import yenon.screencap.draw.DrawHandler;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.control.Tooltip;
+import javafx.scene.image.Image;
+import javafx.scene.image.WritableImage;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import yenon.screencap.draw.DrawHandler;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -59,9 +59,9 @@ public class CapWindowController {
             BufferedImage image = robot.createScreenCapture(new Rectangle(screenDimensions));
             screenshotImage = new WritableImage(screenDimensions.width, screenDimensions.height);
             SwingFXUtils.toFXImage(image, screenshotImage);
-            drawHandler = new DrawHandler(mainPane,canvasPreview,canvasSelection,screenshotImage, flowPaneTools);
+            drawHandler = new DrawHandler(mainPane, canvasPreview, canvasSelection, screenshotImage, flowPaneTools);
             primaryStage.fullScreenProperty().addListener((observableValue, aBoolean, t1) -> {
-                if(!t1){
+                if (!t1) {
                     System.exit(0);
                 }
             });
@@ -75,6 +75,7 @@ public class CapWindowController {
         }
     }
 
+    @SuppressWarnings("unused")
     @FXML
     public void initialize() {
         //region UploadTool
@@ -82,7 +83,7 @@ public class CapWindowController {
         toolImageView.setDisable(true);
         toolImageView.setPickOnBounds(true);
         toolImageView.setOnMouseClicked(event -> closeWindow());
-        Tooltip.install(toolImageView, new Tooltip("Upload to <websitename>"));
+        Tooltip.install(toolImageView, new Tooltip("Upload to <Website Name>"));
         flowPaneTools.addNode(toolImageView);
         //endregion
         //region CloseTool

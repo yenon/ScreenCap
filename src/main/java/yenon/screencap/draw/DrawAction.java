@@ -8,22 +8,22 @@ import javafx.scene.paint.Color;
  * Created by yenon on 11/19/16.
  */
 public class DrawAction {
-    public interface DrawRunnable{
+    public interface DrawRunnable {
         void draw(GraphicsContext canvas);
     }
 
-    private DrawRunnable drawRunnable;
+    private final DrawRunnable drawRunnable;
 
-    public DrawAction(Color color,double radius,DrawRunnable drawRunnable){
+    public DrawAction(Color color, double radius, DrawRunnable drawRunnable) {
         this.drawRunnable = drawRunnable;
-        this.color=color;
-        this.radius=radius;
+        this.color = color;
+        this.radius = radius;
     }
 
-    private javafx.scene.paint.Color color;
-    private double radius;
+    private final javafx.scene.paint.Color color;
+    private final double radius;
 
-    public void draw(GraphicsContext canvas){
+    public void draw(GraphicsContext canvas) {
         canvas.setStroke(color);
         canvas.setFill(color);
         canvas.setLineWidth(radius);

@@ -10,7 +10,7 @@ import javafx.scene.layout.TilePane;
  */
 public class SelectingTilePane extends TilePane {
 
-    SimpleIntegerProperty selectedNode = new SimpleIntegerProperty();
+    final SimpleIntegerProperty selectedNode = new SimpleIntegerProperty();
 
     public void addMonitoredNode(Node monitoredNode, Runnable onClick) {
         final int pos = super.getChildren().size();

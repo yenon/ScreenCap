@@ -14,6 +14,6 @@ public class LineTool extends ToolView {
 
     @Override
     public DrawAction getDrawAction(MouseEvent start, MouseEvent end, Color color, double radius) {
-        return new DrawAction(color,radius, canvas -> canvas.strokeLine(start.getX(),start.getY(),end.getX(),end.getY()));
+        return new DrawAction(color, radius, canvas -> canvas.strokeLine(start.getX(), start.getY(), end.getX(), end.getY()));
     }
 }

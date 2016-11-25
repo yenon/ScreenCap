@@ -9,9 +9,9 @@ import javafx.scene.layout.Pane;
  */
 public class BackgroundImageView extends Pane {
 
-    private ImageView imageView = new ImageView();
+    private final ImageView imageView = new ImageView();
 
-    private void init(){
+    private void init() {
         this.getChildren().add(imageView);
     }
 
@@ -26,17 +26,9 @@ public class BackgroundImageView extends Pane {
         init();
     }
 
-    public void setBackground(String color){
-        this.setStyle("-fx-background-color: "+color+";");
-    }
-
-    public void setImage(Image image){
+    public void setImage(Image image) {
         imageView.setImage(image);
         this.setWidth(image.getWidth());
         this.setHeight(image.getHeight());
-    }
-
-    public Image getImage(){
-        return imageView.getImage();
     }
 }

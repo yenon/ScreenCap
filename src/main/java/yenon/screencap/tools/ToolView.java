@@ -10,14 +10,15 @@ import yenon.screencap.ui.BackgroundImageView;
 /**
  * Created by yenon on 11/19/16.
  */
-public abstract class ToolView extends BackgroundImageView{
+public abstract class ToolView extends BackgroundImageView {
 
-    public static final ToolView[] ALL_VIEWS = new ToolView[]{new LineTool(),new RectangleTool(),new EllipseTool()};
+    @SuppressWarnings("StaticInitializerReferencesSubClass")
+    public static final ToolView[] ALL_VIEWS = new ToolView[]{new LineTool(), new RectangleTool(), new EllipseTool()};
 
-    public ToolView(String tooltip,String icon){
+    public ToolView(String tooltip, String icon) {
         this.setImage(new Image(ToolView.class.getResourceAsStream(icon)));
-        Tooltip.install(this,new Tooltip(tooltip));
+        Tooltip.install(this, new Tooltip(tooltip));
     }
 
-    public abstract DrawAction getDrawAction(MouseEvent start, MouseEvent end,Color color,double radius);
+    public abstract DrawAction getDrawAction(MouseEvent start, MouseEvent end, Color color, double radius);
 }
