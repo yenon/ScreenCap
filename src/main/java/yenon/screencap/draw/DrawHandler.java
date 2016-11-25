@@ -7,6 +7,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.*;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import yenon.screencap.drag.DragHandler;
@@ -35,7 +36,7 @@ public class DrawHandler {
     private SelectingTilePane flowPaneTools;
     private ArrayList<DrawAction> drawActions = new ArrayList<>();
     private SimpleIntegerProperty drawActionDepth = new SimpleIntegerProperty(0);
-    private ColorPane colorPane = new ColorPane();
+    private ColorPane colorPane;
 
     private EnumSet<DragPos> getDragPos(double x,double y){
         //x=x-managedCanvas.getLayoutX();
@@ -58,7 +59,9 @@ public class DrawHandler {
         return dragPos;
     }
 
-    public DrawHandler(Canvas fullCanvas,Canvas managedCanvas,WritableImage screenshotImage, SelectingTilePane flowPaneTools){
+    public DrawHandler(AnchorPane mainPane, Canvas fullCanvas, Canvas managedCanvas, WritableImage screenshotImage, SelectingTilePane flowPaneTools){
+        colorPane = new ColorPane(mainPane);
+
         this.fullCanvas = fullCanvas;
         this.managedCanvas = managedCanvas;
         this.screenshotImage=screenshotImage;

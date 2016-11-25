@@ -6,6 +6,7 @@ import javafx.scene.image.*;
 import javafx.scene.image.Image;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.layout.AnchorPane;
 import yenon.screencap.draw.DrawHandler;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
@@ -39,6 +40,8 @@ public class CapWindowController {
     }
 
     @FXML
+    private AnchorPane mainPane;
+    @FXML
     private Pane canvasPane;
     @FXML
     private Canvas canvasPreview;
@@ -56,7 +59,7 @@ public class CapWindowController {
             BufferedImage image = robot.createScreenCapture(new Rectangle(screenDimensions));
             screenshotImage = new WritableImage(screenDimensions.width, screenDimensions.height);
             SwingFXUtils.toFXImage(image, screenshotImage);
-            drawHandler = new DrawHandler(canvasPreview,canvasSelection,screenshotImage, flowPaneTools);
+            drawHandler = new DrawHandler(mainPane,canvasPreview,canvasSelection,screenshotImage, flowPaneTools);
             primaryStage.fullScreenProperty().addListener((observableValue, aBoolean, t1) -> {
                 if(!t1){
                     System.exit(0);
