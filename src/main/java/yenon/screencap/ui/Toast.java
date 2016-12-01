@@ -14,16 +14,17 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
 
-import java.awt.*;
+import java.awt.Rectangle;
+import java.awt.MouseInfo;
 
 /**
  * Created by yenon on 11/20/16.
  */
-public final class Toast {
+final class Toast {
 
     private final Stage toastStage;
     private final StackPane root;
-    private final long toastDelay;
+    private final int toastDelay;
     private Runnable onFinish;
 
     public Toast(String toastMsg, @SuppressWarnings("SameParameterValue") int toastDelay) {

@@ -9,11 +9,19 @@ import yenon.screencap.draw.DrawAction;
  */
 public class LineTool extends ToolView {
     public LineTool() {
-        super("Paint ", "/images/line.png");
+        super("Draw a line", "/images/line.png");
     }
 
     @Override
-    public DrawAction getDrawAction(MouseEvent start, MouseEvent end, Color color, double radius) {
-        return new DrawAction(color, radius, canvas -> canvas.strokeLine(start.getX(), start.getY(), end.getX(), end.getY()));
+    public DrawAction getDrawAction(MouseEvent start, MouseEvent end, Color color, double size) {
+        if (!start.isPrimaryButtonDown() || start.isShiftDown()) {
+            if (Math.abs(end.getX() - start.getX()) > Math.abs(end.getY() - start.getY())) {
+                return new DrawAction(color, size, canvas -> canvas.strokeLine(start.getX(), start.getY(), end.getX(), start.getY()));
+            } else {
+                return new DrawAction(color, size, canvas -> canvas.strokeLine(start.getX(), start.getY(), start.getX(), end.getY()));
+            }
+        } else {
+            return new DrawAction(color, size, canvas -> canvas.strokeLine(start.getX(), start.getY(), end.getX(), end.getY()));
+        }
     }
 }

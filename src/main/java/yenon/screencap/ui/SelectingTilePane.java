@@ -10,18 +10,34 @@ import javafx.scene.layout.TilePane;
  */
 public class SelectingTilePane extends TilePane {
 
-    final SimpleIntegerProperty selectedNode = new SimpleIntegerProperty();
+    private final SimpleIntegerProperty selectedNode = new SimpleIntegerProperty();
 
     public void addMonitoredNode(Node monitoredNode, Runnable onClick) {
         final int pos = super.getChildren().size();
         monitoredNode.setOnMouseClicked(mouseEvent -> {
             Node node = SelectingTilePane.super.getChildren().get(selectedNode.get());
-            node.setStyle("");
+            if(node instanceof SelectablePane){
+                ((SelectablePane)node).setSelected(false);
+            }
             selectedNode.setValue(pos);
-            monitoredNode.setStyle("-fx-background-color: #0000FF77; -fx-background-radius: 4;");
+            if(monitoredNode instanceof SelectablePane){
+                ((SelectablePane)monitoredNode).setSelected(true);
+            }
             onClick.run();
         });
         super.getChildren().add(monitoredNode);
+    }
+
+    public void setSelectedNode(int newSelectedNode) {
+        Node node = SelectingTilePane.super.getChildren().get(selectedNode.get());
+        if(node instanceof SelectablePane){
+            ((SelectablePane)node).setSelected(false);
+        }
+        selectedNode.setValue(newSelectedNode);
+        Node monitoredNode = super.getChildren().get(newSelectedNode);
+        if(monitoredNode instanceof SelectablePane){
+            ((SelectablePane)monitoredNode).setSelected(true);
+        }
     }
 
     public void addNode(Node node) {

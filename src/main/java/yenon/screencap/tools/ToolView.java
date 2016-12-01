@@ -16,9 +16,10 @@ public abstract class ToolView extends BackgroundImageView {
     public static final ToolView[] ALL_VIEWS = new ToolView[]{new LineTool(), new RectangleTool(), new EllipseTool()};
 
     public ToolView(String tooltip, String icon) {
+        super();
         this.setImage(new Image(ToolView.class.getResourceAsStream(icon)));
         Tooltip.install(this, new Tooltip(tooltip));
     }
 
-    public abstract DrawAction getDrawAction(MouseEvent start, MouseEvent end, Color color, double radius);
+    public abstract DrawAction getDrawAction(MouseEvent start, MouseEvent end, Color color, double size);
 }

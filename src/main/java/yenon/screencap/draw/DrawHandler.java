@@ -7,10 +7,12 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.WritableImage;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import yenon.screencap.drag.ClickListener;
 import yenon.screencap.drag.DragHandler;
 import yenon.screencap.drag.DragListener;
 import yenon.screencap.tools.ToolView;
@@ -84,6 +86,19 @@ public class DrawHandler {
                 redrawCanvas();
             }
         });
+        fullDragHandler.addClickListener(mouseEvent -> {
+            System.out.println("Huh, weird...");
+            if (!(mouseEvent.getButton() == MouseButton.PRIMARY)) {
+                managedCanvas.setLayoutX(0);
+                managedCanvas.setLayoutY(0);
+                managedCanvas.setWidth(fullCanvas.getWidth());
+                managedCanvas.setHeight(fullCanvas.getHeight());
+                if (!flowPaneTools.isVisible()) {
+                    flowPaneTools.setVisible(true);
+                }
+                redrawCanvas();
+            }
+        });
         //endregion
         //region Foreground dragging
         DragHandler dragHandler = new DragHandler();
@@ -131,7 +146,6 @@ public class DrawHandler {
                 if (managedCanvas.getLayoutY() + managedCanvas.getHeight() > fullCanvas.getHeight()) {
                     managedCanvas.setLayoutY(fullCanvas.getHeight() - managedCanvas.getHeight());
                 }
-
                 redrawCanvas();
             }
 
@@ -169,6 +183,7 @@ public class DrawHandler {
         //endregion
         //region Color Picker
         flowPaneTools.addNode(colorPane);
+        Tooltip.install(colorPane, new Tooltip("Select the color\nfor the other Tools"));
         //endregion
         //region Move Tool
         moveTool = new ToolView("Move the selection", "/images/move.png") {
@@ -181,6 +196,7 @@ public class DrawHandler {
         moveTool.setPickOnBounds(true);
         flowPaneTools.addMonitoredNode(moveTool, () -> currentTool = moveTool);
         currentTool = moveTool;
+        flowPaneTools.setSelectedNode(flowPaneTools.getChildren().size()-1);
         //endregion
         //region MouseAnimation
         managedCanvas.setOnMouseMoved(mouseEvent -> {

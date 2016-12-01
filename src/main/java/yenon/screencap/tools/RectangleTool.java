@@ -16,13 +16,13 @@ public class RectangleTool extends ToolView {
     }
 
     @Override
-    public DrawAction getDrawAction(MouseEvent start, MouseEvent end, Color color, double radius) {
-        return new DrawAction(color, radius, canvas -> {
-            Rectangle.Double selection = UI.getSelectedRectangle(start.getX(), start.getY(), end.getX(), end.getY());
+    public DrawAction getDrawAction(MouseEvent start, MouseEvent end, Color color, double size) {
+        return new DrawAction(color, size, canvas -> {
+            Rectangle selection = UI.getSelectedRectangle(start.getX(), start.getY(), end.getX(), end.getY());
             if (start.isShiftDown() || !start.isPrimaryButtonDown()) {
-                canvas.strokeRoundRect(selection.x, selection.y, selection.width, selection.height, radius * 5, radius * 5);
+                canvas.strokeRoundRect(selection.x, selection.y, selection.width, selection.height, size * 5, size * 5);
             } else {
-                canvas.strokeRoundRect(selection.x, selection.y, selection.width, selection.height, radius, radius);
+                canvas.strokeRoundRect(selection.x, selection.y, selection.width, selection.height, size, size);
             }
         });
     }

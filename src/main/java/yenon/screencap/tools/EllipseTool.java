@@ -16,10 +16,10 @@ public class EllipseTool extends ToolView {
     }
 
     @Override
-    public DrawAction getDrawAction(MouseEvent start, MouseEvent end, Color color, double radius) {
-        return new DrawAction(color, radius, canvas -> {
+    public DrawAction getDrawAction(MouseEvent start, MouseEvent end, Color color, double size) {
+        return new DrawAction(color, size, canvas -> {
             canvas.setStroke(color);
-            Rectangle.Double selection = UI.getSelectedRectangle(start.getX(), start.getY(), end.getX(), end.getY());
+            Rectangle selection = UI.getSelectedRectangle(start.getX(), start.getY(), end.getX(), end.getY());
             canvas.strokeOval(selection.x, selection.y, selection.width, selection.height);
         });
     }
